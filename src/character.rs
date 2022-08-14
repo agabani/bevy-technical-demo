@@ -11,8 +11,8 @@ impl bevy::prelude::Plugin for Plugin {
 }
 
 /// Handles when client connection was lost.
-fn client_connection_lost(mut reader: EventReader<quic::Inbound>) {
-    for event in reader.iter() {
-        info!(event = ?event, "character");
+fn client_connection_lost(mut reader: EventReader<quic::Data>) {
+    for _event in reader.iter() {
+        // info!(event = ?event, "character");
     }
 }

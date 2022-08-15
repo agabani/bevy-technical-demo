@@ -20,8 +20,9 @@ pub fn run() -> crate::Result<()> {
 
 /// Adds backends.
 fn add_backends(app: &mut App, runtime: &tokio::runtime::Runtime) {
-    use crate::quic;
+    use crate::{postgres, quic};
 
+    postgres::backend(app, runtime);
     quic::backend(app, runtime);
 }
 
@@ -37,9 +38,10 @@ fn add_default_plugins(app: &mut App) {
 
 /// Adds game plugins.
 fn add_game_plugins(app: &mut App) {
-    use crate::{character, connection, quic};
+    use crate::{character, connection, postgres, quic};
 
     app.add_plugin(character::Plugin)
         .add_plugin(connection::Plugin)
+        .add_plugin(postgres::Plugin)
         .add_plugin(quic::Plugin);
 }

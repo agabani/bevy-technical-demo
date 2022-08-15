@@ -26,6 +26,16 @@ pub(crate) enum Payload {
         sender: tokio::sync::mpsc::UnboundedSender<Payload>,
     },
     ServerDisconnected,
+    ClientAuthenticate(ClientAuthenticate),
+    ClientAuthenticated {
+        username: String,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct ClientAuthenticate {
+    pub(crate) username: String,
+    pub(crate) password: String,
 }
 
 pub(crate) fn backend(app: &mut App, runtime: &tokio::runtime::Runtime) {

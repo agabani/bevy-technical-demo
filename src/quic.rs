@@ -27,6 +27,9 @@ pub(crate) enum Payload {
     },
     ServerDisconnected,
     ClientAuthenticate(ClientAuthenticate),
+    ClientAuthenticateFailed {
+        username: String,
+    },
     ClientAuthenticated {
         username: String,
     },

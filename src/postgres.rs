@@ -10,6 +10,7 @@ pub(crate) enum Request {
 #[derive(Debug, Clone)]
 pub(crate) enum Response {
     ClientAuthenticated(ClientAuthenticated),
+    ClientAuthenticateFailed(ClientAuthenticateFailed),
 }
 
 #[derive(Debug, Clone)]
@@ -21,6 +22,12 @@ pub(crate) struct ClientAuthenticate {
 
 #[derive(Debug, Clone)]
 pub(crate) struct ClientAuthenticated {
+    pub(crate) connection_id: usize,
+    pub(crate) username: String,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct ClientAuthenticateFailed {
     pub(crate) connection_id: usize,
     pub(crate) username: String,
 }
@@ -41,6 +48,13 @@ pub(crate) fn backend(app: &mut App, runtime: &tokio::runtime::Runtime) {
                     {
                         response_sender.send(Response::ClientAuthenticated(
                             ClientAuthenticated {
+                                connection_id: client_authenticate.connection_id,
+                                username: client_authenticate.username,
+                            },
+                        ))?
+                    } else {
+                        response_sender.send(Response::ClientAuthenticateFailed(
+                            ClientAuthenticateFailed {
                                 connection_id: client_authenticate.connection_id,
                                 username: client_authenticate.username,
                             },

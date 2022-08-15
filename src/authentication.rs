@@ -7,6 +7,7 @@ pub(crate) struct Plugin;
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
         app.add_system(client_authenticate)
+            .add_system(client_authenticate_failed)
             .add_system(client_authenticate_validated)
             .add_system(client_authenticated);
     }
@@ -48,6 +49,43 @@ fn client_authenticate(
     }
 }
 
+fn client_authenticate_failed(
+    mut responses: EventReader<postgres::Response>,
+    connections: Query<(
+        &connection::Client,
+        &connection::Connection,
+        &connection::ConnectionId,
+    )>,
+) {
+    for response in responses.iter() {
+        let response = match response {
+            postgres::Response::ClientAuthenticateFailed(response) => response,
+            _ => continue,
+        };
+
+        let span = info_span!("connection", connection_id = response.connection_id);
+        let _guard = span.enter();
+
+        let span = info_span!("account", username = response.username);
+        let _guard = span.enter();
+
+        info!("Authenticate failed");
+
+        let payload = quic::Payload::ClientAuthenticateFailed {
+            username: response.username.clone(),
+        };
+
+        connections
+            .iter()
+            .filter(|(_, _, connection_id)| response.connection_id == connection_id.connection_id)
+            .for_each(|(_, connection, _)| {
+                if let Err(error) = connection.sender.send(payload.clone()) {
+                    error!(error = ?error,"Failed to send");
+                }
+            });
+    }
+}
+
 fn client_authenticate_validated(
     mut responses: EventReader<postgres::Response>,
     connections: Query<(
@@ -59,7 +97,8 @@ fn client_authenticate_validated(
 ) {
     for response in responses.iter() {
         let response = match response {
-            postgres::Response::ClientAuthenticated(client_authenticated) => client_authenticated,
+            postgres::Response::ClientAuthenticated(response) => response,
+            _ => continue,
         };
 
         let span = info_span!("connection", connection_id = response.connection_id);

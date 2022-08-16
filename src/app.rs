@@ -38,9 +38,11 @@ fn add_default_plugins(app: &mut App) {
 
 /// Adds game plugins.
 fn add_game_plugins(app: &mut App) {
-    use crate::{character, connection, postgres, quic};
+    use crate::{authentication, authentication_ui, character, connection, postgres, quic};
 
-    app.add_plugin(character::Plugin)
+    app.add_plugin(authentication::Plugin)
+        .add_plugin(authentication_ui::Plugin)
+        .add_plugin(character::Plugin)
         .add_plugin(connection::Plugin)
         .add_plugin(postgres::Plugin)
         .add_plugin(quic::Plugin);

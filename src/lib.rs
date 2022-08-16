@@ -1,6 +1,7 @@
 #[warn(clippy::pedantic)]
 pub mod app;
 mod authentication;
+mod authentication_ui;
 mod character;
 mod connection;
 mod postgres;

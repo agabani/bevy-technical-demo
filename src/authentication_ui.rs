@@ -4,12 +4,17 @@ pub(crate) struct Plugin;
 
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
-        app.add_system(button).add_startup_system(setup);
+        app.add_system(button)
+            .add_system(input)
+            .add_startup_system(setup);
     }
 }
 
 #[derive(Component)]
 pub(crate) struct AuthenticationUi;
+
+#[derive(Component)]
+pub(crate) struct UsernameText;
 
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
@@ -40,11 +45,47 @@ fn button(
     }
 }
 
+fn input(
+    mut char_evr: EventReader<ReceivedCharacter>,
+    keys: Res<Input<KeyCode>>,
+    mut string: Local<String>,
+    mut username: Query<(&AuthenticationUi, &mut Text), With<UsernameText>>,
+) {
+    for ev in char_evr.iter() {
+        string.push(ev.char);
+
+        let (_, mut username) = username.get_single_mut().unwrap();
+        username.sections[0].value = string.clone();
+    }
+}
+
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(Name::new("camera"))
         .insert(AuthenticationUi);
+
+    commands
+        .spawn_bundle(
+            TextBundle::from_section(
+                "abc",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(0.9, 0.9, 0.9),
+                },
+            )
+            .with_text_alignment(TextAlignment::TOP_CENTER)
+            .with_style(Style {
+                margin: UiRect::all(Val::Auto),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..Style::default()
+            }),
+        )
+        .insert(Name::new("username"))
+        .insert(AuthenticationUi)
+        .insert(UsernameText);
 
     commands
         .spawn_bundle(ButtonBundle {

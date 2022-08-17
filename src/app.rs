@@ -34,6 +34,10 @@ fn add_default_plugins(app: &mut App) {
     } else {
         app.add_plugins(DefaultPlugins);
     }
+
+    if cfg!(feature = "editor") {
+        app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
+    }
 }
 
 /// Adds game plugins.

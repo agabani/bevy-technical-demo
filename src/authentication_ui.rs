@@ -5,7 +5,7 @@ pub(crate) struct Plugin;
 impl bevy::prelude::Plugin for Plugin {
     fn build(&self, app: &mut App) {
         app.add_system(button)
-            .add_system(input)
+            // .add_system(input)
             .add_startup_system(setup);
     }
 }
@@ -66,50 +66,77 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(AuthenticationUi);
 
     commands
-        .spawn_bundle(
-            TextBundle::from_section(
-                "abc",
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
-                },
-            )
-            .with_text_alignment(TextAlignment::TOP_CENTER)
-            .with_style(Style {
-                margin: UiRect::all(Val::Auto),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..Style::default()
-            }),
-        )
-        .insert(Name::new("username"))
-        .insert(AuthenticationUi)
-        .insert(UsernameText);
-
-    commands
-        .spawn_bundle(ButtonBundle {
+        .spawn_bundle(NodeBundle {
+            color: Color::NONE.into(),
             style: Style {
-                size: Size::new(Val::Px(250.0), Val::Px(65.0)),
+                flex_direction: FlexDirection::ColumnReverse,
                 margin: UiRect::all(Val::Auto),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
                 ..Style::default()
             },
-            color: NORMAL_BUTTON.into(),
-            ..ButtonBundle::default()
+            ..NodeBundle::default()
         })
-        .insert(Name::new("button"))
-        .insert(AuthenticationUi)
-        .add_children(|parent| {
-            parent.spawn_bundle(TextBundle::from_section(
-                "Login",
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
-                    ..TextStyle::default()
-                },
-            ));
+        .insert(Name::new("form"))
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(
+                    TextBundle::from_section(
+                        "username",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 48.0,
+                            color: Color::rgb(0.5, 0.5, 0.5),
+                        },
+                    )
+                    .with_style(Style {
+                        max_size: Size::new(Val::Percent(100.0), Val::Px(48.0)),
+                        ..Style::default()
+                    }),
+                )
+                .insert(Name::new("username"));
+
+            parent
+                .spawn_bundle(
+                    TextBundle::from_section(
+                        "password",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 48.0,
+                            color: Color::rgb(0.5, 0.5, 0.5),
+                        },
+                    )
+                    .with_style(Style {
+                        max_size: Size::new(Val::Percent(100.0), Val::Px(48.0)),
+                        ..Style::default()
+                    }),
+                )
+                .insert(Name::new("password"));
+
+            parent
+                .spawn_bundle(ButtonBundle {
+                    style: Style {
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..Style::default()
+                    },
+                    color: Color::rgb(0.56, 0.96, 0.27).into(),
+                    ..ButtonBundle::default()
+                })
+                .insert(Name::new("login"))
+                .add_children(|parent| {
+                    parent.spawn_bundle(
+                        TextBundle::from_section(
+                            "login",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 48.0,
+                                color: Color::rgb(0.5, 0.5, 0.5),
+                            },
+                        )
+                        .with_style(Style {
+                            margin: UiRect::all(Val::Px(8.0)),
+                            ..Style::default()
+                        }),
+                    );
+                });
         });
 }
